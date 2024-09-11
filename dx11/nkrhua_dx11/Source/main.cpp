@@ -1,8 +1,8 @@
 #include "../Headers/systemclass.h"
 
-int WINAPI WinMain(HINSTANCE hInstance, HISTANCE hPrevInstance, PSTR pScmdline, int iCmdshow)
+int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR pScmdline, int iCmdshow)
 {
-	SytemClass* System;
+	SystemClass* System;
 	bool result;
 
 	System = new SystemClass;
