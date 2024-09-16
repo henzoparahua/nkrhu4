@@ -4,7 +4,7 @@
 flowchart TB
 
 wm[main] --- sc[SystemClass]
-click wm "https://github.com/henzoparahua/nkrhu4/tree/RTK01_BASE-FRAMEWORK?tab=readme-ov-file#maincpp"
+click wm "#main.cpp"
 sc --- ic[InputClass]
 sc --- ac[ApplicationClass]
 
