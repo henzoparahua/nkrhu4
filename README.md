@@ -4,7 +4,7 @@
 flowchart TB
 
 wm[main] --- sc[SystemClass]
-click wm "#main.cpp"
+
 sc --- ic[InputClass]
 sc --- ac[ApplicationClass]
 
