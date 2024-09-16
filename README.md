@@ -1,11 +1,15 @@
 # Framework and Window
+
 ```mermaid
 flowchart TB
+
 wm[main] --- sc[SystemClass]
+click wm "## main"
 sc --- ic[InputClass]
 sc --- ac[ApplicationClass]
+
 ```
-## WinMain - Main
+## main.cpp
 ```cpp
 // dx11/nkrhua_dx11/Source/main.cpp
 #include "../Headers/systemclass.h"
@@ -53,3 +57,49 @@ If the function succeeds, terminating when it receibes a `WM_QUIT` message, it s
 
 > [!NOTE]
 > The name WinMain is used by convention by many programming frameworks. Your WinMain should initialize the application, display its main window and enter a message retrieval-and-dispatch loop that is the top-level control structure for the remainder of the application's execution. It terminates the message loop when receives a `WM_QUIT`message. If `WM_QUIT` was received as a result of calling `PostQuitMessage`, the value of `wParam` is the value of the `PostQuitMessage` function's `nExitCode` parameter.
+
+---
+
+## SystemClass.h
+```cpp
+#ifndef _SYSTEMCLASS_H_
+#define _SYSTEMCLASS_H_
+
+#define WIN32_LEAN_AND_MEAN
+
+#include <Windows.h>
+#include "inputclass.h"
+#include "applicationclass.h"
+
+class SystemClass
+{
+public:
+	SystemClass();
+	SystemClass(const SystemClass&);
+	~SystemClass();
+
+	bool Initialize();
+	void Shutdown();
+	void Run();
+
+	LRESULT CALLBACK MessageHandler(HWND, UINT, WPARAM, LPARAM);
+
+private:
+	bool Frame();
+	void InitializeWindows(int&, int&);
+	void ShutdownWindows();
+
+	LPCWSTR m_applicationName;
+	HINSTANCE m_hInstance;
+	HWND m_hwnd;
+
+	InputClass* m_Input;
+	ApplicationClass* m_Application;
+};
+
+static LRESULT CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM);
+
+static SystemClass* ApplicationHandle = 0;
+
+#endif
+```
