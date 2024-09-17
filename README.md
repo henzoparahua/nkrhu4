@@ -112,7 +112,7 @@ bool ApplicationClass::Frame()
 	return true;
 }
 ```
-### `bool Render();`
+### `bool ApplicationClass::Render()`
 ```cpp
 // dx11/nkrhua_dx11/Source/applicationclass.cpp
 bool ApplicationClass::Render()
