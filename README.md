@@ -185,8 +185,7 @@ bool SystemClass::Initialize()
 
 	m_Application = new ApplicationClass;
 
-	result = m_Application->Initialize(screenWidth, screenHeight,
-										 m_hwnd);
+	result = m_Application->Initialize(screenWidth, screenHeight, m_hwnd);
 	if (!result)
 	{
 		return false;
