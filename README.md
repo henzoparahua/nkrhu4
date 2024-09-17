@@ -91,8 +91,7 @@ private:
 ### `bool Initialize(int, int, HWND);`
 ```cpp
 // dx11/nkrhua_dx11/Source/applicationclass.cpp
-bool ApplicationClass::Initialize(int screenWidth, int screenHeight, 
-								  HWND hwnd)
+bool ApplicationClass::Initialize(int screenWidth, int screenHeight, HWND hwnd)
 {
 	return true;
 }
