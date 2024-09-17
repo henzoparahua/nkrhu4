@@ -4,7 +4,7 @@
 flowchart TB
 
 wm[main] --- sc[SystemClass]
-
+click wm "## main"
 sc --- ic[InputClass]
 sc --- ac[ApplicationClass]
 
@@ -59,9 +59,71 @@ If the function succeeds, terminating when it receibes a `WM_QUIT` message, it s
 > The name WinMain is used by convention by many programming frameworks. Your WinMain should initialize the application, display its main window and enter a message retrieval-and-dispatch loop that is the top-level control structure for the remainder of the application's execution. It terminates the message loop when receives a `WM_QUIT`message. If `WM_QUIT` was received as a result of calling `PostQuitMessage`, the value of `wParam` is the value of the `PostQuitMessage` function's `nExitCode` parameter.
 
 ---
+## ApplicationClass.h
+```cpp
+// dx11/nkrhua_dx11/Headers/applicationclass.h
+#ifndef _APPLICATIONCLASS_H_
+#define _APPLICATIONCLASS_H_
 
+#include <Windows.h>
+
+const bool FULL_SCREEN = false;
+const bool VSYNC_ENABLED = true;
+const float SCREEN_DEPTH = 1000.0f;
+const float SCREEN_NEAR = 0.3f;
+
+class ApplicationClass
+{
+public:
+	ApplicationClass();
+	ApplicationClass(const ApplicationClass&);
+	~ApplicationClass();
+
+	bool Initialize(int, int, HWND);
+	void Shutdown();
+	bool Frame();
+
+private:
+	bool Render();
+};
+#endif;
+```
+### `bool Initialize(int, int, HWND);`
+```cpp
+// dx11/nkrhua_dx11/Source/applicationclass.cpp
+bool ApplicationClass::Initialize(int screenWidth, int screenHeight, 
+								  HWND hwnd)
+{
+	return true;
+}
+```
+### `void Shutdown();`
+```cpp
+// dx11/nkrhua_dx11/Source/applicationclass.cpp
+void ApplicationClass::Shutdown()
+{
+	return;
+}
+```
+### `bool Frame();`
+```cpp
+// dx11/nkrhua_dx11/Source/applicationclass.cpp
+bool ApplicationClass::Frame()
+{
+	return true;
+}
+```
+### `bool Render();`
+```cpp
+// dx11/nkrhua_dx11/Source/applicationclass.cpp
+bool ApplicationClass::Render()
+{
+	return true;
+}
+```
 ## SystemClass.h
 ```cpp
+// dx11/nkrhua_dx11/Headers/systemclass.h
 #ifndef _SYSTEMCLASS_H_
 #define _SYSTEMCLASS_H_
 
@@ -102,4 +164,34 @@ static LRESULT CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM);
 static SystemClass* ApplicationHandle = 0;
 
 #endif
+```
+### Functions and Members
+#### `bool Initialize();`
+```cpp
+// dx11/nkrhua_dx11/Source/systemclass.cpp
+
+bool SystemClass::Initialize()
+{
+	int screenWidth, screenHeight;
+	bool result;
+
+	screenHeight = 0;
+	screenWidth = 0;
+
+	InitializeWindows(screenWidth, screenHeight);
+
+	m_Input = new InputClass;
+	m_Input->Initialize();
+
+	m_Application = new ApplicationClass;
+
+	result = m_Application->Initialize(screenWidth, screenHeight,
+										 m_hwnd);
+	if (!result)
+	{
+		return false;
+	}
+
+	return true;
+}
 ```
