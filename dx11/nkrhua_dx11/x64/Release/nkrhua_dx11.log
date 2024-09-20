@@ -1,0 +1,9 @@
+﻿  applicationclass.cpp
+  inputclass.cpp
+  main.cpp
+  systemclass.cpp
+  Generating code
+  Previous IPDB not found, fall back to full compilation.
+  All 26 functions were compiled because no usable IPDB/IOBJ from previous compilation was found.
+  Finished generating code
+  nkrhua_dx11.vcxproj -> C:\Users\Henzo Possebon\Documents\henzoparahua\nkrhu4\dx11\nkrhua_dx11\x64\Release\nkrhua_dx11.exe
