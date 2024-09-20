@@ -88,7 +88,7 @@ private:
 };
 #endif;
 ```
-### `bool Initialize(int, int, HWND);`
+### `bool ApplicationClass::Initialize(int screenWidth, int screenHeight, HWND hwnd)`
 ```cpp
 // dx11/nkrhua_dx11/Source/applicationclass.cpp
 bool ApplicationClass::Initialize(int screenWidth, int screenHeight, HWND hwnd)
@@ -96,7 +96,7 @@ bool ApplicationClass::Initialize(int screenWidth, int screenHeight, HWND hwnd)
 	return true;
 }
 ```
-### `void Shutdown();`
+### `void ApplicationClass::Shutdown()`
 ```cpp
 // dx11/nkrhua_dx11/Source/applicationclass.cpp
 void ApplicationClass::Shutdown()
@@ -104,7 +104,7 @@ void ApplicationClass::Shutdown()
 	return;
 }
 ```
-### `bool Frame();`
+### `bool ApplicationClass::Frame()`
 ```cpp
 // dx11/nkrhua_dx11/Source/applicationclass.cpp
 bool ApplicationClass::Frame()
@@ -112,12 +112,79 @@ bool ApplicationClass::Frame()
 	return true;
 }
 ```
-### `bool Render();`
+### `bool ApplicationClass::Render()`
 ```cpp
 // dx11/nkrhua_dx11/Source/applicationclass.cpp
 bool ApplicationClass::Render()
 {
 	return true;
+}
+```
+## InputClass.h
+```cpp
+// dx11/nkrhua_dx11/Headers/inputclass.h
+#ifndef _INPUTCLASS_H_
+#define _INPUTCLASS_H_
+
+class InputClass
+{
+public:
+	InputClass();
+	InputClass(const InputClass&);
+	~InputClass();
+
+	void Initialize();
+
+	void KeyDown(unsigned int);
+	void KeyUp(unsigned int);
+
+	bool IsKeyDown(unsigned int);
+
+private:
+	bool m_keys[256];
+};
+#endif
+
+```
+### `void InputClass::Initialize()`
+```cpp
+// dx11/nkrhua_dx11/Source/inputclass.cpp
+void InputClass::Initialize()
+{
+	int i;
+
+	for (i = 0; i < 256; i++)
+	{
+		m_keys[i] = false;
+	}
+
+	return;
+}
+```
+### `void InputClass::KeyDown(unsigned int input)`
+```cpp
+// dx11/nkrhua_dx11/Source/inputclass.cpp
+void InputClass::KeyDown(unsigned int input)
+{
+	m_keys[input] = true;
+	return;
+}
+```
+### `void InputClass::KeyUp(unsigned int input)`
+```cpp
+// dx11/nkrhua_dx11/Source/inputclass.cpp
+void InputClass::KeyUp(unsigned int input)
+{
+	m_keys[input] = false;
+	return;
+}
+```
+### `bool InputClass::IsKeyDown(unsigned int key)`
+```cpp
+// dx11/nkrhua_dx11/Source/inputclass.cpp
+bool InputClass::IsKeyDown(unsigned int key)
+{
+	return m_keys[key];
 }
 ```
 ## SystemClass.h
