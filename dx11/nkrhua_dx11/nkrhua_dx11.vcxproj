@@ -20,12 +20,14 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source\applicationclass.cpp" />
+    <ClCompile Include="Source\d3dclass.cpp" />
     <ClCompile Include="Source\inputclass.cpp" />
     <ClCompile Include="Source\main.cpp" />
     <ClCompile Include="Source\systemclass.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Headers\applicationclass.h" />
+    <ClInclude Include="Headers\d3dclass.h" />
     <ClInclude Include="Headers\inputclass.h" />
     <ClInclude Include="Headers\systemclass.h" />
   </ItemGroup>
