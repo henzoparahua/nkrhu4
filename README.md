@@ -110,7 +110,7 @@ bool ApplicationClass::Initialize(int screenWidth, int screenHeight, HWND hwnd)
 	return true;
 }
 ```
-We send this function the screen width, height, handle to the window and four global variables from the ApplicationClass.h file. The D3DClass will use all these variables to setup the Direct3D system.
+
 #### `void ApplicationClass::Shutdown()`
 ```cpp
 // dx11/nkrhua_dx11/Source/applicationclass.cpp
@@ -373,8 +373,6 @@ So, with the specified libraries, the next thing we do is include the headers fo
 #include <directxmath.h>
 using namespace DirectX;
 ```
-
-
 #### `D3DClass::D3DClass()`
 ```cpp
 // dx11/nkrhua_dx11/Source/systemclass.cpp
@@ -390,32 +388,146 @@ D3DClass::D3DClass()
 	m_rasterState = 0;
 }
 ```
+Like most classes, we begin with initializing all the member pointers to null in the class constructor. All pointers from the header file have all been accounted for here.
 #### `bool D3DClass::Initialize(int screenWidth, int screenHeight, bool vsync, HWND hwnd, bool fullscreen, float screenDepth, float screenNear)`
 ```cpp
+bool D3DClass::Initialize(int screenWidth, int screenHeight, bool vsync, HWND hwnd, bool fullscreen, float screenDepth, float screenNear)
+{
 	HRESULT result;
-
 	IDXGIFactory* factory;
 	IDXGIAdapter* adapter;
 	IDXGIOutput* adapterOutput;
-
 	unsigned int numModes, i, numerator, denominator;
 	unsigned long long stringLength;
-
 	DXGI_MODE_DESC* displayModeList;
 	DXGI_ADAPTER_DESC adapterDesc;
-
 	int error;
-
 	DXGI_SWAP_CHAIN_DESC swapChainDesc;
 	D3D_FEATURE_LEVEL featureLevel;
-	ID3D11Texture2D* backBufferPTR;
+	ID3D11Texture2D* backBufferPtr;
 	D3D11_TEXTURE2D_DESC depthBufferDesc;
 	D3D11_DEPTH_STENCIL_DESC depthStencilDesc;
 	D3D11_DEPTH_STENCIL_VIEW_DESC depthStencilViewDesc;
 	D3D11_RASTERIZER_DESC rasterDesc;
-
 	float fieldOfView, screenAspect;
 
+
+	// Store the vsync setting.
 	m_vsync_enabled = vsync;
 ```
-#### 
+The Intialize function is what does the entire setup of Direct3D for DirectX 11. 
+- The screenWidth and screenHeight of the window are given to this function, those are the same variables created previously in the SystemClass. 
+- The hwnd variable is a handle to the window. Direct3D will need this handle to access the window we previously created.
+- The fullscreen variable is whether we are running in windowed mode or fullscreen. Direct3D needs this as well for creating the window with the correct settings. 
+- The screenDepth and screenNear are the depth settings for our 3D environment that will be rendered in the window. 
+- The vsync variable indicates if we want Direct3D to render according to the users monitor refresh rate or just go as fast as possible.
+
+>[!Note]
+>Before we can initialize Direct3D, we have to get the refresh rate from the video card/monitor. Each computer may be slightly different so we will need to query for that information. We query for the numerator and denominator values and then pass them to DirectX during the setup and it will calculate the proper refresh rate. If we don't do this and just set the refresh rate to a default value which may not exist on all computers, then DirectX will respond by performing a blit instead of a buffer flip which will degrade performance and give us annoying errors in the debug output.
+
+Getting the numerator and denominator values of the refresh rate from the monitor/video card:
+```cpp
+//	Create the DirectX graphics interface:
+	result = CreateDXGIFactory(__uuidof(IDXGIFactory), (void**)&factory);
+	if (FAILED(result))
+	{
+		return false;
+	}
+
+//	Use the factory to create an adapter for the primary graphics interface (memory card):
+	result = factory->EnumAdapters(0, &adapter);
+	if (FAILED(result))
+	{
+		return false;
+	}
+
+//	Enumerate the primary adapter output (monitor):
+	result = adapter->EnumOutputs(0, &adapterOutput);
+	if (FAILED(result))
+	{
+		return false;
+	}
+	
+//	Get the number of modes that fit the DXGI_FORMAT_R8G8B8A8_UNORM display format for the adapter output (monitor):
+	result = adapterOutput->GetDisplayModeList(DXGI_FORMAT_R8G8B8A8_UNORM, DXGI_ENUM_MODES_INTERLACED, &numModes, NULL);
+	if (FAILED(result))
+	{
+		return false;
+	}
+
+  	displayModeList = new DXGI_MODE_DESC[numModes];
+	if (!displayModeList)
+	{
+		return false;
+	}
+
+// Now fill the display mode list structures.
+	result = adapterOutput->GetDisplayModeList(DXGI_FORMAT_R8G8B8A8_UNORM, DXGI_ENUM_MODES_INTERLACED, &numModes, displayModeList);
+	if (FAILED(result))
+	{
+		return false;
+	}
+
+//	Now go through all the display modes and find the one that matches the screen width and height;
+//	When a match is found store the numerator and denominator of the refresh rate for that monitor:
+	for (i = 0; i < numModes; i++)
+	{
+		if (displayModeList[i].Width == (unsigned int)screenWidth)
+		{
+			if (displayModeList[i].Height == (unsigned int)screenHeight)
+			{
+				numerator = displayModeList[i].RefreshRate.Numerator;
+				denominator = displayModeList[i].RefreshRate.Denominator;
+			}
+		}
+	}
+```
+So, now we have the numerator and denominator for the refresh rate. The last thing we will need to query by using the adapter is the name of the video card and the amount of video memory:
+```cpp
+//	Now using the adapter we will retrieve the name of the video card and amount of video memory.
+//	Get the adapter (video card) description:
+	result = adapter->GetDesc(&adapterDesc);
+	if (FAILED(result))
+	{
+		return false;
+	}
+
+//	Store the dedicated video card memory in megabytes:
+	m_videoCardMemory = (int)(adapterDesc.DedicatedVideoMemory / 1024 / 1024);
+
+//	Convert the name of the video card to a character array and store it:
+	error = wcstombs_s(&stringLength, m_videoCardDescription, 128, adapterDesc.Description, 128);
+	if (error != 0)
+	{
+		return false;
+	}
+```
+So, now with the proper refresh rate from the system, we can start the DirectX initialization. The first thing we'll do is fill out the description of the swap chain.
+> [!Note] Swap Chain
+> The swap chain is the front and back buffer to which the graphics will be drawn.
+> In Direct3D, a swap chain is a collection of buffers used for displaying frames to the user. Each time an application presents a new frame, the first buffer in the swap chain takes the place of the displayed buffer, a process known as swapping or flipping.  Generally, you use a single back buffer, do all your drawing to it and then swap it to the front buffer which then displays on the screen. 
+> - It serves to avoid tearing, which occurs when the monitor displays parts of multiple frames simultaneously, by synchronizing the frame presentation with the monitor's refresh rate.
+> - It allows for double buffering, where one buffer is displayed while the other is being drawn to. This ensures smooth and continuous rendering.
+> - By managing multiple buffers, the swap chain helps optimize rendering performance and visual quality.
+> 
+> When creating a swap chain, you need to fill in its description to define several key characteristics:
+> - Buffer Count: Number of buffers in the chain.
+> - Buffer Format: The format of the buffers (e.g. color depth).
+> - Buffer Usage: How the buffers will be used (e.g. render target).
+> - Output Window: The window where the frames will be displayed.
+> - Sample description: Multi-sampling parameters for anti-aliasing.
+> - Swap Effect: How the buffers are swapped (e.g., discard, sequential).
+```cpp
+//	Initialize the swap chain description:
+	ZeroMemory(&swapChainDesc, sizeof(swapChainDesc));
+
+//	Set to a single back buffer:
+	swapChainDesc.BufferCount = 1;
+
+//	Set the width and height of the back buffer:
+	swapChainDesc.BufferDesc.Width = screenWidth;
+	swapChainDesc.BufferDesc.Height = screenHeight;
+
+//	Set the regular 32-bit surface for the back buffer:
+	swapChainDesc.BufferDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+```
