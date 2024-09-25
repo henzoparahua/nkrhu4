@@ -583,14 +583,14 @@ After setting up the swap chain description, we also need to setup one more vari
 
 Now that the swap chain description and feature level have been filled out, we can create the swap chain itself, the Direct3D device and the Direct3D Device Context. 
 
-> **Note**  
+> [!Tip]  
 > Direct3D Device
 > The device is responsible for creating resources such as buffers, textures and shaders. It also enumerates the capabilities of the display adapter.
 > - It is represented by the `ID3D11Device` Interface.
 > - You create a device using functions like `D3D11CreateDevice` or `D3D11CreateDeviceAndSwapChain`.
 > - Each application typically has one device, which can be used to create multiple resources.
 
-> **Note**  
+> [!Tip]  
 > Direct3D DeviceContext
 > The DeviceContext is used to set pipeline states and issue rendering commands. It manages the state of the GPU and handles the rendering process.
 > - Represented by the ID3D11DeviceContext interface.
