@@ -531,3 +531,69 @@ So, now with the proper refresh rate from the system, we can start the DirectX i
 //	Set the regular 32-bit surface for the back buffer:
 	swapChainDesc.BufferDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
 ```
+The next part of the description of the swap chain is the refresh rate. The refresh rate is how many times a second it will draws the back buffer to the front buffer. If vsync is set to true in our applicationclass.h header, then this will lock the refresh rate to the system settings. That means it will only draw the screen 60 times a second (or higher if the system refresh rate be superior). However, if we set vsync to false, then it will draw the screen as many times as it can, which can cause some visual artifacts.
+```cpp
+//	Set the refresh rate of the back buffer:
+	if (m_vsync_enabled)
+	{
+		swapChainDesc.BufferDesc.RefreshRate.Numerator = numerator;
+		swapChainDesc.BufferDesc.RefreshRate.Denominator = denominator;
+	}
+	else
+	{
+		swapChainDesc.BufferDesc.RefreshRate.Numerator = 0;
+		swapChainDesc.BufferDesc.RefreshRate.Denominator = 1;
+	}
+
+//	Set the usage of the back buffer:
+	swapChainDesc.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
+
+//	Set the handle for the window to render to:
+	swapChainDesc.OutputWindow = hwnd;
+
+//	Turn multisampling off:
+	swapChainDesc.SampleDesc.Count = 1;
+	swapChainDesc.SampleDesc.Quality = 0;
+
+//	Set to fullscreen of windowed mode:
+	if (fullscreen)
+	{
+		swapChainDesc.Windowed = false;
+	}
+	else
+	{
+		swapChainDesc.Windowed = true;
+	}
+
+//	Set the scan line ordering and scaling to unspecified:
+	swapChainDesc.BufferDesc.ScanlineOrdering = DXGI_MODE_SCANLINE_ORDER_UNSPECIFIED;
+	swapChainDesc.BufferDesc.Scaling = DXGI_MODE_SCALING_UNSPECIFIED;
+
+//	Discard the back buffer contents after presenting:
+	swapChainDesc.SwapEffect = DXGI_SWAP_EFFECT_DISCARD;
+
+//	Dont set the advanced flags:
+	swapChainDesc.Flags = 0;
+```
+After setting up the swap chain description, we also need to setup one more variable called the feature level. This variable tells which version of DirectX we want to use.
+```cpp
+// Set the feature level to DirectX 11.
+	featureLevel = D3D_FEATURE_LEVEL_11_0;
+```
+
+Now that the swap chain description and feature level have been filled out, we can create the swap chain itself, the Direct3D device and the Direct3D Device Context. 
+
+> [!Note] Direct3D Device
+> The device is responsible for creating resources such as buffers, textures and shaders. It also enumerates the capabilities of the display adapter.
+> - It is represented by the `ID3D11Device` Interface.
+> - You create a device using functions like `D3D11CreateDevice` or `D3D11CreateDeviceAndSwapChain`.
+> - Each application typically has one device, which can be used to create multiple resources.
+
+> [!Note] Direct3D DeviceContext
+> The DeviceContext is used to set pipeline states and issue rendering commands. It manages the state of the GPU and handles the rendering process.
+> - Represented by the ID3D11DeviceContext interface.
+> - Typically there are two types of Device Context:
+> 	- Immediate Context: 
+> 	Used for immediate rendering commands. Each device has one immediate context, which can be retrieved by using `ID3D11Device::GetImmediateContext`.
+> 	- Deferred Context:
+> 	Used to record commands that can be executed later, primarily useful for multithreading. You can create a deferred context using `ID3D11Device::CreateDeferredContext`.
