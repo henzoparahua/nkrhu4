@@ -449,8 +449,7 @@ Getting the numerator and denominator values of the refresh rate from the monito
 	}
 	
 //	Get the number of modes that fit the DXGI_FORMAT_R8G8B8A8_UNORM display format for the adapter output (monitor):
-	result = adapterOutput->GetDisplayModeList(DXGI_FORMAT_R8G8B8A8_UNORM, 
-			DXGI_ENUM_MODES_INTERLACED, &numModes, NULL);
+	result = adapterOutput->GetDisplayModeList(DXGI_FORMAT_R8G8B8A8_UNORM, DXGI_ENUM_MODES_INTERLACED, &numModes, NULL);
 	if (FAILED(result))
 	{
 		return false;
@@ -463,8 +462,7 @@ Getting the numerator and denominator values of the refresh rate from the monito
 	}
 
 // Now fill the display mode list structures.
-	result = adapterOutput->GetDisplayModeList(DXGI_FORMAT_R8G8B8A8_UNORM, 
-			DXGI_ENUM_MODES_INTERLACED, &numModes, displayModeList);
+	result = adapterOutput->GetDisplayModeList(DXGI_FORMAT_R8G8B8A8_UNORM, DXGI_ENUM_MODES_INTERLACED, &numModes, displayModeList);
 	if (FAILED(result))
 	{
 		return false;
@@ -585,15 +583,15 @@ After setting up the swap chain description, we also need to setup one more vari
 
 Now that the swap chain description and feature level have been filled out, we can create the swap chain itself, the Direct3D device and the Direct3D Device Context. 
 
-> [!Tip]  
-> Direct3D Device
+> [!Note] 
+> Direct3D Device <br>
 > The device is responsible for creating resources such as buffers, textures and shaders. It also enumerates the capabilities of the display adapter.
 > - It is represented by the `ID3D11Device` Interface.
 > - You create a device using functions like `D3D11CreateDevice` or `D3D11CreateDeviceAndSwapChain`.
 > - Each application typically has one device, which can be used to create multiple resources.
 
-> [!Tip]  
-> Direct3D DeviceContext
+> [!Note] 
+> Direct3D DeviceContext <br>
 > The DeviceContext is used to set pipeline states and issue rendering commands. It manages the state of the GPU and handles the rendering process.
 > - Represented by the ID3D11DeviceContext interface.
 > - Typically there are two types of Device Context:
@@ -601,3 +599,117 @@ Now that the swap chain description and feature level have been filled out, we c
 > 	Used for immediate rendering commands. Each device has one immediate context, which can be retrieved by using `ID3D11Device::GetImmediateContext`.
 > 	- Deferred Context:
 > 	Used to record commands that can be executed later, primarily useful for multithreading. You can create a deferred context using `ID3D11Device::CreateDeferredContext`.
+
+Setting up the Swap Chain, Device and DeviceContext:
+```cpp
+//	Create the swap chain, Direct3D device and Direct3D device context:
+	result = D3D11CreateDeviceAndSwapChain(NULL, 
+	D3D_DRIVER_TYPE_HARDWARE, NULL, 0, &featureLevel, 1,
+	D3D11_SDK_VERSION, &swapChainDesc, &m_swapChain, &m_device, 
+	NULL, &m_deviceContext);
+	if (FAILED(result))
+	{
+		return false;
+	}
+```
+Now that we have the swap chain, we need to get a pointer to the back buffer and then attach it to the swap chain so we'll use the CreateRenderTargetView function to attach the back buffer to our swap chain:
+```cpp
+//	Get the pointer to the back buffer.
+	result = m_swapChain->GetBuffer(0, __uuidof(ID3D11Texture2D),
+						 (LPVOID*)&backBufferPTR);
+	if (FAILED(result))
+	{
+		return false;
+	}
+
+//	Create the render target view with the back buffer pointer:
+	result = m_device->CreateRenderTargetView(backBufferPTR, NULL,
+						&m_renderTargetView);
+	if (FAILED(result))
+	{
+		return false;
+	}
+
+
+//	Release pointer to the back buffer as we no longer need it:
+	backBufferPTR->Release();
+	backBufferPTR = 0;
+```
+We will also need to set up a depth buffer description. We'll use this so our polygons can be rendered properly in 3D space. At the same time, we will attach a stencil buffer to our depth buffer. The stencil buffer can be used to achieve effects such as motion blur, volumetric shadows and other shiny things.
+
+```cpp
+//	Initialize the description of the depth buffer.
+	ZeroMemory(&depthBufferDesc, sizeof(depthBufferDesc));
+
+//	Setup the description of the depth buffer:
+	depthBufferDesc.Width = screenWidth;
+	depthBufferDesc.Height = screenHeight;
+	depthBufferDesc.MipLevels = 1;
+	depthBufferDesc.ArraySize = 1;
+	depthBufferDesc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
+	depthBufferDesc.SampleDesc.Count = 1;
+	depthBufferDesc.SampleDesc.Quality = 0;
+	depthBufferDesc.Usage = D3D11_USAGE_DEFAULT;
+	depthBufferDesc.BindFlags = D3D11_BIND_DEPTH_STENCIL;
+	depthBufferDesc.CPUAccessFlags = 0;
+	depthBufferDesc.MiscFlags = 0;
+```
+> [!Note]
+> `D3D11_TEXTURE2D_DESC depthBufferDesc;`
+> It is a structure of the Direct3D 11 API, which is used for handling 2D textures. This structure describes the properties of a 2D texture, including its width, height and usage.
+
+Now we create the depth/stencil buffer using that description. Notice we use the CreateTexture2D function to make the buffers, hence the buffer is just a 2D texture. The reason is that once the polygons are sorted and rasterized, they just end up being colored pixels in this 2D buffer. Then this 2D buffer is drawn to the screen.
+
+```cpp
+// Create the texture for the depth buffer using the filled out description.
+	result = m_device->CreateTexture2D(&depthBufferDesc, NULL,
+						&m_depthStencilBuffer);
+	if(FAILED(result))
+	{
+		return false;
+	}
+```
+So lets setup the depth stencil description. This allows us to control what type of depth test Direct3D will do for each pixel.
+
+```cpp
+//	Initialize the description of the stencil state:
+	ZeroMemory(&depthStencilDesc, sizeof(depthStencilDesc));
+
+//	Set up the description of the stencil state:
+	depthStencilDesc.DepthEnable = true;
+	depthStencilDesc.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ALL;
+	depthStencilDesc.DepthFunc = D3D11_COMPARISON_LESS;
+
+	depthStencilDesc.StencilEnable = true;
+	depthStencilDesc.StencilReadMask = 0xFF;
+	depthStencilDesc.StencilWriteMask = 0xFF;
+
+//	Stencil operations if pixel is front-facing:
+	depthStencilDesc.FrontFace.StencilFailOp = D3D11_STENCIL_OP_KEEP;
+	depthStencilDesc.FrontFace.StencilDepthFailOp = D3D11_STENCIL_OP_INCR;
+	depthStencilDesc.FrontFace.StencilPassOp = D3D11_STENCIL_OP_KEEP;
+	depthStencilDesc.FrontFace.StencilFunc = D3D11_COMPARISON_ALWAYS;
+
+// Stencil operations if pixel is back-facing.
+	depthStencilDesc.BackFace.StencilFailOp = D3D11_STENCIL_OP_KEEP;
+	depthStencilDesc.BackFace.StencilDepthFailOp = D3D11_STENCIL_OP_DECR;
+	depthStencilDesc.BackFace.StencilPassOp = D3D11_STENCIL_OP_KEEP;
+	depthStencilDesc.BackFace.StencilFunc = D3D11_COMPARISON_ALWAYS;
+
+```
+And so, we can create the depth stencil state.
+
+```cpp
+// Create the depth stencil state.
+	result = m_device->CreateDepthStencilState(&depthStencilDesc, &m_depthStencilState);
+	if (FAILED(result))
+	{
+		return false;
+	}
+```
+
+With it created, we can set this change into the deviceContext, so it actually takes on:
+```cpp
+	m_deviceContext->OMSetDepthStencilState(m_depthStencilState, 1);
+```
+As we finish the description of the view of the depth stencil buffer, we create its view. We do this so that Direct3D knows to use the depth buffer as a depth stencil texture. After filling out the description, we call the function `CreateDepthStencilView` to create it.
