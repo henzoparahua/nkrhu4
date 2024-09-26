@@ -713,3 +713,65 @@ With it created, we can set this change into the deviceContext, so it actually t
 	m_deviceContext->OMSetDepthStencilState(m_depthStencilState, 1);
 ```
 As we finish the description of the view of the depth stencil buffer, we create its view. We do this so that Direct3D knows to use the depth buffer as a depth stencil texture. After filling out the description, we call the function `CreateDepthStencilView` to create it.
+
+```cpp
+//	Initialize the depth stencil view:
+	ZeroMemory(&depthStencilViewDesc, sizeof(depthStencilViewDesc));
+
+//	Setup the depth stencil view description:
+	depthStencilViewDesc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
+	depthStencilViewDesc.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2D;
+	depthStencilViewDesc.Texture2D.MipSlice = 0;
+
+//	Create the depth stencil view:
+	result = m_device->CreateDepthStencilView(m_depthStencilBuffer, 
+						&depthStencilViewDesc, &m_depthStencilView);
+	if (FAILED(result))
+	{
+		return false;
+	}
+
+```
+With that created, we call the `OMSetRenderTarget`. This will bind the render target view and the depth stencil buffer to the output render pipeline. This way, the graphics that the pipeline randers will get drawn to our back buffer that we previously created. With the graphics written to the back buffer, we can then swap it to the front and display our graphics on the user's screen.
+```cpp
+//	Bind the render target view and depth stencil buffer to the output render pipeline:
+	m_deviceContext->OMSetRenderTargets(1, &m_renderTargetView, m_depthStencilView);
+```
+Now that the targets are setup we can continue on to some extra functions that gives us more control over our scenes for future modifications. First we will create is a rasterizer state. This will give us control over how polygons are rendered. We can do things like make our scenes render in wireframe mode or have DirectX draw both the front and back faces of polygons.
+By default, DirectX already has a rasterizer state set up and working the exact same as the one below, however you have no control over how to change it unless you set up one yourself, as we are doing now:
+```cpp
+//	Setup the raster description which will determine how and what polygons will be drawn:
+	rasterDesc.AntialiasedLineEnable = false;
+	rasterDesc.CullMode = D3D11_CULL_BACK;
+	rasterDesc.DepthBias = 0;
+	rasterDesc.DepthBiasClamp = 0.0f;
+	rasterDesc.DepthClipEnable = true;
+	rasterDesc.FillMode = D3D11_FILL_SOLID;
+	rasterDesc.FrontCounterClockwise = false;
+	rasterDesc.MultisampleEnable = false;
+	rasterDesc.ScissorEnable = false;
+	rasterDesc.SlopeScaledDepthBias = 0.0f;
+
+//	Create the rasterizer state from the description we just filled out:
+	result = m_device->CreateRasterizerState(&rasterDesc, &m_rasterState);
+	if (FAILED(result))
+	{
+		return false;
+	}
+
+//	Now set the rasterizer state:
+	m_deviceContext->RSSetState(m_rasterState);
+```
+The viewport also needs to be setup so that Direct3D can map clip space coordinates to the render target space. Set this to be the entire size of the window:
+```cpp
+// Setup the viewport for rendering:
+	m_viewport.Width = (float)screenWidth;
+	m_viewport.Height = (float)screenHeight;
+	m_viewport.MinDepth = 0.0f;
+	m_viewport.MaxDepth = 1.0f;
+	m_viewport.TopLeftX = 0.0f;
+	m_viewport.TopLeftY = 0.0f;
+
+//	Create the viewport
+	m_deviceContext->RSSetViewports(1, &m_viewport);
+```
