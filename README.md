@@ -775,3 +775,28 @@ The viewport also needs to be setup so that Direct3D can map clip space coordina
 //	Create the viewport
 	m_deviceContext->RSSetViewports(1, &m_viewport);
 ```
+
+Now we will create the projection matrix. It is used to translate the 3D scene into the 2D viewport space that we had created. We will need to keep a copy of this matrix so that we can pass it to our shaders that will be used to render our scenes.
+
+```cpp
+//	Setup the projection matrix:
+	fieldOfView = 3.141592654f / 4.0f;
+	screenAspect = (float)screenWidth / (float)screenHeight;
+
+//	Create the projection matrix for the 3D rendering:
+	m_projectionMatrix = XMMatrixPerspectiveFovLH(fieldOfView, screenAspect, screenNear, screenDepth);
+```
+
+We will also create another matrix called m_WorldMatrix. This is used to convert the vertices of our objects into vertices in the 3D scene. This matrix will also be used to rotate, translate and scale objects in 3D space. 
+```cpp
+//	Initialize the world matrix to the identity matrix:
+	m_worldMatrix = XMMatrixIdentity();
+```
+The final thing we will setup in the initialize function is an orthographic projection matrix. This matrix is used for rendering 2D elements like user interfaces on the screen allowing us to skip the 3D rendering.
+```cpp
+//	Create an orthographic projection matrix for 2D rendering:
+	m_orthoMatrix = XMMatrixOrthographicLH((float)screenWidth, (float)screenHeight, screenNear, screenDepth);
+
+	return true;
+}
+```
