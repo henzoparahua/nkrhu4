@@ -803,3 +803,47 @@ The final thing we will setup in the initialize function is an orthographic proj
 	return true;
 }
 ```
+
+In the D3DClass we also have a couple of helper functions. The first two are BeginScene and EndScene. 
+
+```cpp
+void D3DClass::BeginScene(float red, float green, float blue, float alpha)
+{
+	float color[4];
+
+//	Setup the color to clear the buffer to
+	color[0] = red;
+	color[1] = green;
+	color[2] = blue;
+	color[3] = alpha;
+
+//	Clear the back buffer:
+	m_deviceContext->ClearRenderTargetView(m_renderTargetView, color);
+
+//	Clear the depth buffer:
+	m_deviceContext->ClearDepthStencilView(m_depthStencilView, D3D11_CLEAR_DEPTH, 1.0f, 0);
+
+	return;
+}
+```
+BeginScene will be called whenever we are going to draw a new 3D scene at the beginning of each frame. All it does is initialize the buffers so they are blank and ready to be drawn to.
+
+```cpp
+void D3DClass::EndScene()
+{
+//	Present the back buffer to the screen since the rendering is complete:
+	if (m_vsync_enabled)
+	{
+//	Lock the screen refresh rate:
+		m_swapChain->Present(1, 0);
+	}
+	else
+	{
+//	Present as fast as possible:
+		m_swapChain->Present(0, 0);
+	}
+
+	return;
+}
+```
+The other function is EndScene, it tells the swap chain to display our 3D scene once all the drawing has completed at the end of each frame.
