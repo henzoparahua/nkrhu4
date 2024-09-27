@@ -701,7 +701,8 @@ And so, we can create the depth stencil state.
 
 ```cpp
 // Create the depth stencil state.
-	result = m_device->CreateDepthStencilState(&depthStencilDesc, &m_depthStencilState);
+	result = m_device->CreateDepthStencilState(&depthStencilDesc,
+		 &m_depthStencilState);
 	if (FAILED(result))
 	{
 		return false;
@@ -725,7 +726,7 @@ As we finish the description of the view of the depth stencil buffer, we create 
 
 //	Create the depth stencil view:
 	result = m_device->CreateDepthStencilView(m_depthStencilBuffer, 
-						&depthStencilViewDesc, &m_depthStencilView);
+			&depthStencilViewDesc, &m_depthStencilView);
 	if (FAILED(result))
 	{
 		return false;
@@ -784,7 +785,8 @@ Now we will create the projection matrix. It is used to translate the 3D scene i
 	screenAspect = (float)screenWidth / (float)screenHeight;
 
 //	Create the projection matrix for the 3D rendering:
-	m_projectionMatrix = XMMatrixPerspectiveFovLH(fieldOfView, screenAspect, screenNear, screenDepth);
+	m_projectionMatrix = XMMatrixPerspectiveFovLH(fieldOfView, screenAspect,
+	 screenNear, screenDepth);
 ```
 
 We will also create another matrix called m_WorldMatrix. This is used to convert the vertices of our objects into vertices in the 3D scene. This matrix will also be used to rotate, translate and scale objects in 3D space. 
@@ -795,7 +797,8 @@ We will also create another matrix called m_WorldMatrix. This is used to convert
 The final thing we will setup in the initialize function is an orthographic projection matrix. This matrix is used for rendering 2D elements like user interfaces on the screen allowing us to skip the 3D rendering.
 ```cpp
 //	Create an orthographic projection matrix for 2D rendering:
-	m_orthoMatrix = XMMatrixOrthographicLH((float)screenWidth, (float)screenHeight, screenNear, screenDepth);
+	m_orthoMatrix = XMMatrixOrthographicLH((float)screenWidth,
+	(float)screenHeight, screenNear, screenDepth);
 
 	return true;
 }
