@@ -803,9 +803,7 @@ The final thing we will setup in the initialize function is an orthographic proj
 	return true;
 }
 ```
-
-In the D3DClass we also have a couple of helper functions. The first two are BeginScene and EndScene. 
-
+#### `void D3DClass::BeginScene(float red, float green, float blue, float alpha)`
 ```cpp
 void D3DClass::BeginScene(float red, float green, float blue, float alpha)
 {
@@ -827,7 +825,7 @@ void D3DClass::BeginScene(float red, float green, float blue, float alpha)
 }
 ```
 BeginScene will be called whenever we are going to draw a new 3D scene at the beginning of each frame. All it does is initialize the buffers so they are blank and ready to be drawn to.
-
+#### `void D3DClass::EndScene()`
 ```cpp
 void D3DClass::EndScene()
 {
