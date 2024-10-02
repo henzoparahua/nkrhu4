@@ -80,8 +80,7 @@ bool D3DClass::Initialize(int screenWidth, int screenHeight, bool vsync, HWND hw
 		return false;
 	}
 
-//	Create a list to hold all the possible display modes for this monitor/video card combination:
-	displayModeList = new DXGI_MODE_DESC[numModes];
+  	displayModeList = new DXGI_MODE_DESC[numModes];
 	if (!displayModeList)
 	{
 		return false;
@@ -235,7 +234,7 @@ bool D3DClass::Initialize(int screenWidth, int screenHeight, bool vsync, HWND hw
 //	specify that card when creating the device.
 	
 //	Now we need to get a pointer to the back buffer then attach it to the swap chain:
-// Get the pointer to the back buffer.
+//	Get the pointer to the back buffer.
 	result = m_swapChain->GetBuffer(0, __uuidof(ID3D11Texture2D), (LPVOID*)&backBufferPTR);
 	if (FAILED(result))
 	{
