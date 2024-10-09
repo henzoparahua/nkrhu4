@@ -20,7 +20,7 @@ ColorShaderClass::~ColorShaderClass()
 
 //	The initialize function will call the initialization function for the shaders.
 //	We pass in the name of the HLSL shader files.
-bool ColorShaderClass::Initiliaze(ID3D11Device* device, HWND hwnd)
+bool ColorShaderClass::Initialize(ID3D11Device* device, HWND hwnd)
 {
 	bool result;
 	wchar_t vsFilename[128];
@@ -28,14 +28,14 @@ bool ColorShaderClass::Initiliaze(ID3D11Device* device, HWND hwnd)
 	int error;
 
 //	Set the filename of the Vertex Shader:
-	error = wcscpy_s(vsFilename, 128, L"./color_vs.hlsl");
+	error = wcscpy_s(vsFilename, 128, L"./Source/color.vs");
 	if (error != 0)
 	{
 		return false;
 	}
 
 //	Set the filename of the Pixel Shader:
-	error = wcscpy_s(psFilename, 128, L"./color_ps.hlsl");
+	error = wcscpy_s(psFilename, 128, L"./Source/color.ps");
 	if (error != 0)
 	{
 		return false;
