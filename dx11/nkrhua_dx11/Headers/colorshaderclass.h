@@ -31,7 +31,7 @@ public:
 //	The function here handle initializing shutdown of the shader. The render function sets
 //	the shader parameters and then draws the prepared model vertices using the shader.
 	
-	bool Initiliaze(ID3D11Device*, HWND);
+	bool Initialize(ID3D11Device*, HWND);
 	void Shutdown();
 	bool Render(ID3D11DeviceContext*, int, XMMATRIX, XMMATRIX, XMMATRIX);
 
