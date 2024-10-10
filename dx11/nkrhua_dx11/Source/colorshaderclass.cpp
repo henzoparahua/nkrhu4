@@ -28,14 +28,14 @@ bool ColorShaderClass::Initialize(ID3D11Device* device, HWND hwnd)
 	int error;
 
 //	Set the filename of the Vertex Shader:
-	error = wcscpy_s(vsFilename, 128, L"./Source/color.vs");
+	error = wcscpy_s(vsFilename, 128, L"./Source/color_vs.hlsl");
 	if (error != 0)
 	{
 		return false;
 	}
 
 //	Set the filename of the Pixel Shader:
-	error = wcscpy_s(psFilename, 128, L"./Source/color.ps");
+	error = wcscpy_s(psFilename, 128, L"./Source/color_ps.hlsl");
 	if (error != 0)
 	{
 		return false;
