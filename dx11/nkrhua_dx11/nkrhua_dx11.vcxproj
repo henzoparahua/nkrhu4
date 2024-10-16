@@ -38,8 +38,8 @@
     <ClInclude Include="Headers\systemclass.h" />
   </ItemGroup>
   <ItemGroup>
-    <FxCompile Include="Source\color.ps" />
-    <FxCompile Include="Source\color.vs" />
+    <None Include="Source\color_ps.hlsl" />
+    <None Include="Source\color_vs.hlsl" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>17.0</VCProjectVersion>

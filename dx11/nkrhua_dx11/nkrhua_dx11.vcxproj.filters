@@ -64,7 +64,7 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <FxCompile Include="Source\color.vs" />
-    <FxCompile Include="Source\color.ps" />
+    <None Include="Source\color_ps.hlsl" />
+    <None Include="Source\color_vs.hlsl" />
   </ItemGroup>
 </Project>
